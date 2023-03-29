@@ -2,30 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyIdleState : StateMachineBehaviour
+public class EnemyAttackState : StateMachineBehaviour
 {
-    private Enemy enemy;        // reference to enemy
-    private float timer = 0;    // for tracking time passed in this state
-
+    private Enemy enemy;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         enemy = animator.gameObject.GetComponentInParent<Enemy>();
-        timer = 0;
     }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        enemy.Agent.SetDestination(enemy.transform.position); // stand in place
-        timer += Time.deltaTime;
+        enemy.Agent.SetDestination(enemy.transform.position);   // don't move
+        enemy.transform.LookAt(enemy.Player.transform);         // face the player
 
-        if (timer > enemy.IdleTime)
+        // if player is too far away, stop attacking
+        if (enemy.GetDistanceFromPlayer() > enemy.AttackRangeStop)
         {
-            animator.SetBool("isPatrolling", true);
-        } else if (enemy.GetDistanceFromPlayer() < enemy.ChaseRange)
-        {
-            animator.SetBool("isChasing", true);
+            animator.SetBool("isAttacking", false);
         }
     }
 
